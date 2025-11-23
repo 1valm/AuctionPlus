@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аукцион Плюс - Платформа онлайн-аукционов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="notification" id="notification"><span id="notification-text"></span></div>
+
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Вход в систему</h3>
+                <button class="modal-close" id="closeAuthModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Вход</button>
+                    <button class="auth-tab" data-tab="register">Регистрация</button>
+                </div>
+                
+                <form class="auth-form active" id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="Введите ваш email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Пароль</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Введите пароль" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Войти</button>
+                    <div class="form-footer">
+                        <a href="#">Забыли пароль?</a>
+                    </div>
+                </form>
+                
+                <form class="auth-form" id="registerForm">
+                    <div class="form-group">
+                        <label for="registerName">Имя</label>
+                        <input type="text" id="registerName" class="form-control" placeholder="Введите ваше имя" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" class="form-control" placeholder="Введите ваш email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Пароль</label>
+                        <input type="password" id="registerPassword" class="form-control" placeholder="Придумайте пароль" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerConfirmPassword">Подтвердите пароль</label>
+                        <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Повторите пароль" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Зарегистрироваться</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="sellerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Стать продавцом</h3>
+                <button class="modal-close" id="closeSellerModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="sellerForm">
+                    <div class="form-group">
+                        <label for="sellerPhone" class="required">Телефон</label>
+                        <input type="tel" id="sellerPhone" class="form-control" placeholder="+7 (900) 123-45-67" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sellerAddress" class="required">Адрес</label>
+                        <textarea id="sellerAddress" class="form-control" placeholder="Введите ваш адрес" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sellerDescription" class="required">О себе</label>
+                        <textarea id="sellerDescription" class="form-control" placeholder="Расскажите о себе и вашем опыте" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelSellerBtn">Отмена</button>
+                <button class="btn btn-primary" id="submitSellerBtn">Отправить заявку</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Оплата лота</h3>
+                <button class="modal-close" id="closePaymentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-summary">
+                    <h4 id="paymentLotTitle">Название лота</h4>
+                    <div class="payment-summary-item">
+                        <span>Стоимость лота:</span>
+                        <span id="paymentLotPrice">0 ₽</span>
+                    </div>
+                    <div class="payment-summary-item">
+                        <span>Комиссия (5%):</span>
+                        <span id="paymentCommission">0 ₽</span>
+                    </div>
+                    <div class="payment-summary-item payment-summary-total">
+                        <span>Итого к оплате:</span>
+                        <span id="paymentTotal">0 ₽</span>
+                    </div>
+                </div>
+                
+                <div class="payment-methods">
+                    <h4>Способ оплаты</h4>
+                    <div class="payment-cards">
+                        <div class="payment-card active" data-method="balance">
+                            <i class="fas fa-wallet payment-icon"></i>
+                            <div>
+                                <div>Баланс</div>
+                                <small>Оплата с внутреннего счета</small>
+                            </div>
+                        </div>
+                        <div class="payment-card" data-method="card">
+                            <i class="fas fa-credit-card payment-icon"></i>
+                            <div>
+                                <div>Банковская карта</div>
+                                <small>Visa, Mastercard, МИР</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-section active" id="balancePayment">
+                        <p>Списание с вашего баланса: <strong id="balanceAmount">15 750 ₽</strong></p>
+                    </div>
+                    
+                    <div class="payment-section" id="cardPayment">
+                        <div class="form-group">
+                            <label for="cardNumber">Номер карты</label>
+                            <input type="text" id="cardNumber" class="form-control" placeholder="0000 0000 0000 0000">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cardExpiry">Срок действия</label>
+                                <input type="text" id="cardExpiry" class="form-control" placeholder="ММ/ГГ">
+                            </div>
+                            <div class="form-group">
+                                <label for="cardCVC">CVC</label>
+                                <input type="text" id="cardCVC" class="form-control" placeholder="000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelPaymentBtn">Отмена</button>
+                <button class="btn btn-primary" id="confirmPaymentBtn">Оплатить</button>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <div class="logo"><img src="./фото/AuctionTime___.png" alt="" width="100" height="90">Аукцион<span>Плюс</span></div>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Поиск товаров, категорий...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="user-actions">
+                    <button class="btn btn-profile" id="profileBtn"><i class="fas fa-user"></i> Личный кабинет</button>
+                    <button class="btn btn-outline" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Войти</button>
+                    <button class="btn btn-primary" id="registerBtn"><i class="fas fa-user-plus"></i> Регистрация</button>
+                </div>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <div class="container">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-section="auctions"><i class="fas fa-gavel"></i> Аукционы</a></li>
+                    <li><a href="#" class="nav-link" data-section="how-it-works"><i class="fas fa-info-circle"></i> Как это работает</a></li>
+                    <li><a href="#" class="nav-link" data-section="sellers"><i class="fas fa-store"></i> Продавцам</a></li>
+                    <li><a href="#" class="nav-link" data-section="help"><i class="fas fa-question-circle"></i> Помощь</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="auctions-hero">
+        <div class="hero-content">
+            <div class="container">
+                <h1>Покупайте и продавайте на аукционе</h1>
+                <p>Откройте для себя уникальные товары по выгодным ценам. Присоединяйтесь к нашему сообществу покупателей и продавцов.</p>
+                <button class="btn btn-primary btn-large" id="startBuyingBtn"><i class="fas fa-rocket"></i> Начать покупать</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="auctions" class="section active">
+        <div class="container">
+            <h2 class="section-title">Все активные аукционы</h2>
+            
+            <div class="auction-filters">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">Все</button>
+                    <button class="filter-btn" data-filter="ending">Заканчиваются скоро</button>
+                    <button class="filter-btn" data-filter="active">С высокой активностью</button>
+                    <button class="filter-btn" data-filter="new">Новые</button>
+                    <button class="filter-btn" data-filter="electronics">Электроника</button>
+                    <button class="filter-btn" data-filter="art">Искусство</button>
+                    <button class="filter-btn" data-filter="antiques">Антиквариат</button>
+                    <button class="filter-btn" data-filter="jewelry">Ювелирные изделия</button>
+                    <button class="filter-btn" data-filter="clothing">Одежда</button>
+                    <button class="filter-btn" data-filter="home">Дом и сад</button>
+                    <button class="filter-btn" data-filter="collectibles">Коллекционные</button>
+                    <button class="filter-btn" data-filter="sports">Спорт и отдых</button>
+                    <button class="filter-btn" data-filter="books">Книги</button>
+                    <button class="filter-btn" data-filter="auto">Авто и мото</button>
+                    <button class="filter-btn" data-filter="realestate">Недвижимость</button>
+                </div>
+                <div class="filter-group">
+                    <select class="sort-select" id="sortSelectAuctions">
+                        <option value="default">Сортировать по</option>
+                        <option value="ending">Дате окончания</option>
+                        <option value="price-asc">Цене (по возрастанию)</option>
+                        <option value="price-desc">Цене (по убыванию)</option>
+                        <option value="popularity">Популярности</option>
+                        <option value="bids">Количеству ставок</option>
+                        <option value="views">Количеству просмотров</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="auction-carousel-container">
+                <button class="carousel-btn prev"><i class="fas fa-chevron-left"></i></button>
+                <div class="auction-carousel" id="auctionCarousel"></div>
+                <button class="carousel-btn next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item"><span class="stat-value">15,247</span><span class="stat-label">Активных лотов</span></div>
+                <div class="stat-item"><span class="stat-value">8,932</span><span class="stat-label">Участников</span></div>
+                <div class="stat-item"><span class="stat-value">96%</span><span class="stat-label">Успешных сделок</span></div>
+                <div class="stat-item"><span class="stat-value">24/7</span><span class="stat-label">Поддержка</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="lot-detail" class="lot-detail">
+        <div class="container">
+            <button class="btn back-btn" id="backToAuctions"><i class="fas fa-arrow-left"></i> Назад к аукционам</button>
+            <div class="lot-container" id="lotDetailContent"></div>
+        </div>
+    </section>
+
+    <section id="search-results" class="section">
+        <div class="container">
+            <div class="search-header">
+                <button class="btn back-btn" id="backFromSearch"><i class="fas fa-arrow-left"></i> Назад</button>
+                <h2 class="section-title">Результаты поиска</h2>
+            </div>
+            
+            <div class="search-results-count" id="searchResultsCount">Найдено лотов: <span id="resultsCount">0</span></div>
+            
+            <div class="auction-grid" id="searchResultsGrid"></div>
+            
+            <div class="no-results" id="noResults" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>Ничего не найдено</h3>
+                <p>Попробуйте изменить поисковый запрос или воспользуйтесь категориями</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <h2 class="section-title">Как это работает</h2>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Регистрация</h3>
+                    <p>Создайте учетную запись, указав свои данные и подтвердив email. Это займет всего пару минут.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Поиск товаров</h3>
+                    <p>Найдите интересующие вас лоты с помощью поиска или просмотра категорий. Используйте фильтры для уточнения.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Участие в торгах</h3>
+                    <p>Делайте ставки на понравившиеся лоты, следуя правилам аукциона. Следите за временем окончания.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Оплата и получение</h3>
+                    <p>Оплатите выигранный лот и получите товар удобным способом. Мы гарантируем безопасность сделки.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sellers" class="section">
+        <div class="container">
+            <h2 class="section-title">Для продавцов</h2>
+            
+            <div class="seller-benefits">
+                <div class="benefit-card">
+                    <h3><i class="fas fa-percentage benefit-icon"></i> Низкие комиссии</h3>
+                    <p>Всего 5% от конечной цены лота. Никаких скрытых платежей и комиссий за размещение. Первые 3 лота - без комиссии!</p>
+                </div>
+                <div class="benefit-card">
+                    <h3><i class="fas fa-users benefit-icon"></i> Широкая аудитория</h3>
+                    <p>Тысячи активных покупателей ежедневно посещают нашу платформу в поисках уникальных товаров. Ваш лот увидят!</p>
+                </div>
+                <div class="benefit-card">
+                    <h3><i class="fas fa-magic benefit-icon"></i> Простое размещение</h3>
+                    <p>Интуитивный интерфейс позволяет быстро добавить лот с фото и подробным описанием. Всего за 5 минут!</p>
+                </div>
+                <div class="benefit-card">
+                    <h3><i class="fas fa-shield-alt benefit-icon"></i> Безопасные сделки</h3>
+                    <p>Система гарантирует получение оплаты после успешного завершения аукциона. Защита от недобросовестных покупателей.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px; text-align: center;">
+                <h3 style="margin-bottom: 20px; color: var(--primary-color);">Начните продавать прямо сейчас!</h3>
+                <button class="btn btn-primary btn-large" id="becomeSellerBtn"><i class="fas fa-store"></i> Стать продавцом</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="help" class="section">
+        <div class="container">
+            <h2 class="section-title">Помощь и поддержка</h2>
+            
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">Как зарегистрироваться на платформе?<span>+</span></div>
+                    <div class="faq-answer">Для регистрации нажмите кнопку "Регистрация" в правом верхнем углу сайта. Заполните необходимые данные, подтвердите email, и ваша учетная запись будет активирована. Регистрация занимает менее 2 минут.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Как сделать ставку на лот?<span>+</span></div>
+                    <div class="faq-answer">Чтобы сделать ставку, перейдите на страницу интересующего лота, введите сумму ставки в соответствующее поле и нажмите кнопку "Сделать ставку". Убедитесь, что ваша ставка соответствует минимальному шагу. Вы можете отслеживать свои ставки в личном кабинете.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Что делать, если я выиграл аукцион?<span>+</span></div>
+                    <div class="faq-answer">После победы в аукционе вы получите уведомление на email и в личном кабинете. В течение 3 дней необходимо оплатить лот через доступные способы оплаты. После подтверждения оплаты продавец свяжется с вами для организации доставки.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Как отменить ставку?<span>+</span></div>
+                    <div class="faq-answer">Ставки на нашей платформе являются обязательными к исполнению и не могут быть отменены после размещения. Пожалуйста, внимательно проверяйте сумму ставки перед подтверждением.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Какие способы оплаты принимаются?<span>+</span></div>
+                    <div class="faq-answer">Мы принимаем банковские карты (Visa, Mastercard, МИР), электронные кошельки (ЮMoney, QIWI), а также систему быстрых платежей (СБП). Оплата также возможна с баланса личного кабинета.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Как организована доставка товаров?<span>+</span></div>
+                    <div class="faq-answer">Доставка организуется продавцом после подтверждения оплаты. Способы и сроки доставки согласуются между покупателем и продавцом индивидуально. Мы рекомендуем использовать надежные транспортные компании с отслеживанием отправлений.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Что делать, если товар не соответствует описания?<span>+</span></div>
+                    <div class="faq-answer">Если полученный товар не соответствует описанию на сайте, вы можете обратиться в службу поддержки в течение 7 дней с момента получения. Наша команда рассмотрит спор и поможет найти справедливое решение.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Как стать продавцом на платформе?<span>+</span></div>
+                    <div class="faq-answer">Для регистрации в качестве продавца перейдите в раздел "Продавцам" и нажмите кнопку "Стать продавцом". Заполните дополнительную информацию о себе, подтвердите данные, и после модерации вы сможете размещать свои лоты на аукционе.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="profile" class="section">
+        <div class="container">
+            <h2 class="section-title">Личный кабинет</h2>
+            
+            <div class="profile-container">
+                <div class="profile-sidebar">
+                    <ul class="profile-menu">
+                        <li><a href="#" class="profile-menu-link active" data-section="my-bids"><i class="fas fa-gavel"></i> Мои ставки</a></li>
+                        <li><a href="#" class="profile-menu-link" data-section="won-lots"><i class="fas fa-trophy"></i> Выигранные лоты</a></li>
+                        <li><a href="#" class="profile-menu-link" data-section="my-auctions"><i class="fas fa-store"></i> Мои аукционы</a></li>
+                        <li><a href="#" class="profile-menu-link" data-section="create-auction"><i class="fas fa-plus-circle"></i> Создать аукцион</a></li>
+                        <li><a href="#" class="profile-menu-link" data-section="balance"><i class="fas fa-wallet"></i> Мой баланс</a></li>
+                        <li><a href="#" class="profile-menu-link" data-section="watchlist"><i class="fas fa-heart"></i> Мой список отслеживания</a></li>
+                        <li><a href="#" class="profile-menu-link" data-section="settings"><i class="fas fa-cog"></i> Настройки профиля</a></li>
+                    </ul>
+                </div>
+                
+                <div class="profile-content">
+                    <div class="profile-section active" id="my-bids">
+                        <h3>Мои ставки</h3>
+                        <table class="bids-table">
+                            <thead>
+                                <tr>
+                                    <th>Лот</th>
+                                    <th>Моя ставка</th>
+                                    <th>Текущая ставка</th>
+                                    <th>Осталось времени</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Антикварная ваза XVIII века</td>
+                                    <td>6 200 ₽</td>
+                                    <td>6 500 ₽</td>
+                                    <td>2 ч 15 мин</td>
+                                    <td>Перебита</td>
+                                </tr>
+                                <tr>
+                                    <td>Смартфон Apple iPhone 13</td>
+                                    <td>43 000 ₽</td>
+                                    <td>43 000 ₽</td>
+                                    <td>1 д 4 ч</td>
+                                    <td>Лидирую</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="profile-section" id="won-lots">
+                        <h3>Выигранные лоты</h3>
+                        <table class="lots-table">
+                            <thead>
+                                <tr>
+                                    <th>Лот</th>
+                                    <th>Выигранная цена</th>
+                                    <th>Дата завершения</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Винтажная камера Zenit-E</td>
+                                    <td>9 500 ₽</td>
+                                    <td>15.03.2025</td>
+                                    <td>Ожидает оплаты</td>
+                                    <td><button class="btn btn-primary btn-small pay-lot-btn" data-lot-id="7" data-amount="9500">Оплатить</button></td>
+                                </tr>
+                                <tr>
+                                    <td>Набор винтажных книг</td>
+                                    <td>3 200 ₽</td>
+                                    <td>10.03.2025</td>
+                                    <td>Оплачен</td>
+                                    <td><span style="color: var(--success-color);">Оплачено</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="profile-section" id="my-auctions">
+                        <h3>Мои аукционы</h3>
+                        <div style="margin-bottom: 20px;">
+                            <button class="btn btn-primary" id="createAuctionBtn"><i class="fas fa-plus"></i> Создать новый аукцион</button>
+                        </div>
+                        <table class="lots-table">
+                            <thead>
+                                <tr>
+                                    <th>Лот</th>
+                                    <th>Начальная цена</th>
+                                    <th>Текущая ставка</th>
+                                    <th>Ставок</th>
+                                    <th>Осталось времени</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Золотое кольцо с бриллиантом</td>
+                                    <td>25 300 ₽</td>
+                                    <td>28 500 ₽</td>
+                                    <td>9</td>
+                                    <td>6 ч 20 мин</td>
+                                    <td><span style="color: var(--success-color);">Активный</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="profile-section create-auction-section" id="create-auction">
+                        <h3>Создание нового аукциона</h3>
+                        <form class="auction-form" id="auctionForm">
+                            <div class="form-group">
+                                <label for="auctionTitle" class="required">Название лота</label>
+                                <input type="text" id="auctionTitle" class="form-control" placeholder="Введите название товара" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="auctionCategory" class="required">Категория</label>
+                                <select id="auctionCategory" class="category-select" required>
+                                    <option value="">Выберите категорию</option>
+                                    <option value="electronics">Электроника</option>
+                                    <option value="clothing">Одежда</option>
+                                    <option value="home">Дом и сад</option>
+                                    <option value="art">Искусство</option>
+                                    <option value="jewelry">Ювелирные изделия</option>
+                                    <option value="antiques">Антиквариат</option>
+                                    <option value="collectibles">Коллекционные предметы</option>
+                                    <option value="sports">Спорт и отдых</option>
+                                    <option value="books">Книги</option>
+                                    <option value="auto">Авто и мото</option>
+                                    <option value="realestate">Недвижимость</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="auctionDescription" class="required">Описание товара</label>
+                                <textarea id="auctionDescription" class="form-control" placeholder="Подробно опишите товар, его состояние, особенности и т.д." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="startPrice" class="required">Начальная цена (₽)</label>
+                                <input type="number" id="startPrice" class="form-control" min="0" step="0.01" placeholder="0.00" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bidStep" class="required">Минимальный шаг ставки (₽)</label>
+                                <input type="number" id="bidStep" class="form-control" min="1" placeholder="100" value="100" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="auctionDuration" class="required">Продолжительность аукциона</label>
+                                <select id="auctionDuration" class="form-control" required>
+                                    <option value="1">1 день</option>
+                                    <option value="3" selected>3 дня</option>
+                                    <option value="5">5 дней</option>
+                                    <option value="7">7 дней</option>
+                                    <option value="10">10 дней</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-cancel" id="cancelAuctionBtn">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Опубликовать аукцион</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="profile-section" id="balance">
+                        <h3>Мой баланс</h3>
+                        
+                        <div class="balance-section">
+                            <div class="balance-info">
+                                <div>
+                                    <h4>Текущий баланс</h4>
+                                    <div class="balance-amount">15 750 ₽</div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-methods">
+                                <h4>Способы оплаты</h4>
+                                <div class="payment-cards">
+                                    <div class="payment-card active" data-method="card">
+                                        <i class="fas fa-credit-card payment-icon"></i>
+                                        <div>
+                                            <div>Банковская карта</div>
+                                            <small>Visa, Mastercard, МИР</small>
+                                        </div>
+                                    </div>
+                                    <div class="payment-card" data-method="sbp">
+                                        <i class="fas fa-qrcode payment-icon"></i>
+                                        <div>
+                                            <div>СБП</div>
+                                            <small>Быстрый платеж</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-form" id="paymentForm">
+                                    <div class="form-group">
+                                        <label for="paymentAmount">Сумма пополнения (₽)</label>
+                                        <input type="number" id="paymentAmount" class="form-control" min="100" value="1000">
+                                    </div>
+                                    <div class="form-group" id="cardDetails">
+                                        <label for="cardNumber">Номер карты</label>
+                                        <input type="text" id="cardNumber" class="form-control" placeholder="0000 0000 0000 0000">
+                                        <div class="form-row" style="margin-top: 10px;">
+                                            <div class="form-group">
+                                                <label for="cardExpiry">Срок действия</label>
+                                                <input type="text" id="cardExpiry" class="form-control" placeholder="ММ/ГГ">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="cardCVC">CVC</label>
+                                                <input type="text" id="cardCVC" class="form-control" placeholder="000">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" id="processPaymentBtn" style="width: 100%;"> Пополнить баланс</button>
+                                </div>
+                                
+                                <div class="payment-success" id="paymentSuccess"><i class="fas fa-check-circle"></i> Баланс успешно пополнен!</div>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin-top: 30px;">Последние операции</h4>
+                        <table class="transactions-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Описание</th>
+                                    <th>Сумма</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>20.03.2025</td>
+                                    <td>Пополнение через карту *4567</td>
+                                    <td class="transaction-positive">+10 000 ₽</td>
+                                    <td>Успешно</td>
+                                </tr>
+                                <tr>
+                                    <td>18.03.2025</td>
+                                    <td>Оплата лота "Винтажная камера"</td>
+                                    <td class="transaction-negative">-9 500 ₽</td>
+                                    <td>Успешно</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="profile-section" id="watchlist">
+                        <h3>Мой список отслеживания</h3>
+                        <div class="watchlist-grid">
+                            <div class="watchlist-item">
+                                <div class="watchlist-image" style="background-image: url('фото/Часы.jpg')"></div>
+                                <div class="watchlist-info">
+                                    <div class="watchlist-title">Наручные часы Rolex Submariner</div>
+                                    <div class="watchlist-price">225 000 ₽</div>
+                                </div>
+                                <button class="remove-watchlist"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section" id="settings">
+                        <h3>Настройки профиля</h3>
+                        <form class="profile-form" id="profileSettingsForm">
+                            <div class="form-group">
+                                <label for="name">Имя</label>
+                                <input type="text" id="name" class="form-control" value="Иван">
+                            </div>
+                            <div class="form-group">
+                                <label for="surname">Фамилия</label>
+                                <input type="text" id="surname" class="form-control" value="Иванов">
+                            </div>
+                            <div class="form-group">
+                                <label for="patronymic">Отчество</label>
+                                <input type="text" id="patronymic" class="form-control" value="Иванович">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Пол</label>
+                                <select id="gender" class="form-control">
+                                    <option value="male" selected>Мужской</option>
+                                    <option value="female">Женский</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" class="form-control" value="ivan@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Телефон</label>
+                                <input type="tel" id="phone" class="form-control" value="+7 (900) 123-45-67">
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Адрес</label>
+                                <textarea id="address" class="form-control">г. Москва, ул. Примерная, д. 123, кв. 45</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                            <div class="form-group" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                                <button type="button" class="btn btn-cancel" id="deleteAccountBtn" style="background-color: #e74c3c;"><i class="fas fa-trash-alt"></i> Удалить аккаунт</button>
+                                <div class="form-hint">Внимание: удаление аккаунта невозможно отменить. Все ваши данные будут безвозвратно удалены.</div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>АукционПлюс</h3>
+                    <p>Лучшая платформа для онлайн-аукционов. Покупайте и продавайте с уверенностью.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Покупателям</h3>
+                    <ul>
+                        <li><a href="#">Как покупать</a></li>
+                        <li><a href="#">Оплата и доставка</a></li>
+                        <li><a href="#">Частые вопросы</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Продавцам</h3>
+                    <ul>
+                        <li><a href="#">Как продавать</a></li>
+                        <li><a href="#">Комиссии</a></li>
+                        <li><a href="#">Рекомендации</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Контакты</h3>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> info@auctionplus.ru</li>
+                        <li><i class="fas fa-phone"></i> +7 (800) 123-45-67</li>
+                        <li><i class="fas fa-map-marker-alt"></i> г. Астрахань, ул. Куликова, 47</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 АукционПлюс. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
